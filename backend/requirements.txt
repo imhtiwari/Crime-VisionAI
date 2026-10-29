@@ -5,6 +5,7 @@
 Flask==3.0.0
 Flask-CORS==4.0.0
 Flask-SQLAlchemy==3.1.1
+gunicorn==21.2.0
 
 # Database
 SQLAlchemy>=2.0.30
@@ -14,6 +15,7 @@ python-dotenv==1.0.0
 
 # Utilities
 requests==2.31.0
+groq>=1.7.0
 
 # Computer Vision (pre-built wheels)
 opencv-python-headless>=4.8.0

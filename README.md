@@ -1,6 +1,10 @@
 # CrimeVision AI
 
-CrimeVision AI is a locally runnable, multimodal forensic analysis prototype. It stores uploaded evidence and generated analyses in SQLite and local storage, and presents them through a React dashboard. Findings are preliminary decision-support material and require human review.
+CrimeVision AI is a multimodal forensic analysis prototype. It stores uploaded evidence and generated analyses in SQLite and local storage, and presents them through a React dashboard. Findings are preliminary decision-support material and require human review.
+
+## Deployment
+
+For production deployment, see [DEPLOYMENT.md](DEPLOYMENT.md) for instructions on deploying to Render (backend) and Vercel (frontend).
 
 ## Current capabilities
 
