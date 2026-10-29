@@ -28,7 +28,7 @@ This guide explains how to deploy CrimeVision AI to production using Render (bac
    - **Root Directory**: (leave empty)
    - **Runtime**: Python 3
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `cd backend && PYTHONPATH=. gunicorn -c .gunicorn.conf.py wsgi:app`
+   - **Start Command**: `cd backend && PYTHONPATH=. gunicorn -b 0.0.0.0:10000 -w 4 --timeout 30 wsgi:app`
 
 5. Add Environment Variables:
    - `FLASK_ENV`: `production`
