@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { 
   LayoutDashboard, 
@@ -21,6 +21,35 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const location = useLocation()
   const [backendStatus, setBackendStatus] = useState<'connected' | 'disconnected'>('disconnected')
+  const [modelStatus, setModelStatus] = useState('checking')
+
+  useEffect(() => {
+    let active = true
+    const checkBackend = async () => {
+      try {
+        const [health, capabilities] = await Promise.all([
+          fetch('/api/v1/health'),
+          fetch('/api/v1/capabilities'),
+        ])
+        if (active) {
+          setBackendStatus(health.ok ? 'connected' : 'disconnected')
+          const data = await capabilities.json()
+          setModelStatus(data.modules?.object_detection || 'unknown')
+        }
+      } catch {
+        if (active) {
+          setBackendStatus('disconnected')
+          setModelStatus('unavailable')
+        }
+      }
+    }
+    void checkBackend()
+    const timer = window.setInterval(checkBackend, 30000)
+    return () => {
+      active = false
+      window.clearInterval(timer)
+    }
+  }, [])
 
   const navItems = [
     { path: '/', icon: LayoutDashboard, label: 'Overview' },
@@ -94,7 +123,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <Activity className="w-4 h-4" />
-                <span>AI Services: Checking...</span>
+                <span>Object detection: {modelStatus}</span>
               </div>
             </div>
           )}

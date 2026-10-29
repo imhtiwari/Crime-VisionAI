@@ -65,13 +65,18 @@ backend/storage/uploads/*
 backend/storage/evidence/*
 backend/storage/reports/*
 backend/storage/thumbnails/*
+backend/storage/derived/*
 !backend/storage/uploads/.gitkeep
 !backend/storage/evidence/.gitkeep
 !backend/storage/reports/.gitkeep
 !backend/storage/thumbnails/.gitkeep
+!backend/storage/derived/.gitkeep
 
 # Model weights and caches
 models/
+# The backend's SQLAlchemy model package is application source code.
+!backend/app/models/
+!backend/app/models/*.py
 .cache/
 .huggingface/
 
@@ -79,6 +84,8 @@ models/
 .coverage
 htmlcov/
 .pytest_cache/
+.test-run/
+backend/tests/.test-run/
 
 # Logs
 *.log

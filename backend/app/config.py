@@ -11,8 +11,8 @@ class Settings:
     # Flask
     FLASK_APP: str = os.getenv("FLASK_APP", "run.py")
     FLASK_ENV: str = os.getenv("FLASK_ENV", "development")
-    FLASK_DEBUG: bool = os.getenv("FLASK_DEBUG", "True").lower() == "true"
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+    FLASK_DEBUG: bool = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "development-only-change-before-deployment")
     
     # Server
     HOST: str = os.getenv("HOST", "127.0.0.1")
@@ -26,6 +26,7 @@ class Settings:
     EVIDENCE_FOLDER: str = os.getenv("EVIDENCE_FOLDER", "storage/evidence")
     REPORTS_FOLDER: str = os.getenv("REPORTS_FOLDER", "storage/reports")
     THUMBNAILS_FOLDER: str = os.getenv("THUMBNAILS_FOLDER", "storage/thumbnails")
+    DERIVED_FOLDER: str = os.getenv("DERIVED_FOLDER", "storage/derived")
     MAX_UPLOAD_SIZE: int = int(os.getenv("MAX_UPLOAD_SIZE", str(500 * 1024 * 1024)))  # 500MB
     
     # CORS
@@ -33,22 +34,27 @@ class Settings:
     
     # AI Services
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
-    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama3-70b-8192")
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "")
     
     # Object Detection
-    DETECTION_MODEL: str = os.getenv("DETECTION_MODEL", "facebook/detr-resnet-50")
+    DETECTION_MODEL: str = os.getenv("DETECTION_MODEL", "")
+    DETECTION_MODEL_PATH: str = os.getenv("DETECTION_MODEL_PATH", "")
     DETECTION_CONFIDENCE_THRESHOLD: float = float(os.getenv("DETECTION_CONFIDENCE_THRESHOLD", "0.5"))
     
     # Audio Transcription
     WHISPER_MODEL: str = os.getenv("WHISPER_MODEL", "base")
+    WHISPER_MODEL_PATH: str = os.getenv("WHISPER_MODEL_PATH", "")
     WHISPER_DEVICE: str = os.getenv("WHISPER_DEVICE", "auto")
+    ALLOW_MODEL_DOWNLOAD: bool = os.getenv("ALLOW_MODEL_DOWNLOAD", "false").lower() == "true"
     
     # Image Captioning
     CAPTIONING_MODEL: str = os.getenv("CAPTIONING_MODEL", "Salesforce/blip-image-captioning-base")
+    CAPTION_MODEL_PATH: str = os.getenv("CAPTION_MODEL_PATH", "")
     
     # Video Processing
     VIDEO_FRAME_SAMPLE_INTERVAL: int = int(os.getenv("VIDEO_FRAME_SAMPLE_INTERVAL", "30"))  # Sample every 30 frames
     MAX_VIDEO_DURATION: int = int(os.getenv("MAX_VIDEO_DURATION", "3600"))  # 1 hour in seconds
+    MAX_VIDEO_FRAMES: int = int(os.getenv("MAX_VIDEO_FRAMES", "120"))
     
     # Job Processing
     MAX_CONCURRENT_JOBS: int = int(os.getenv("MAX_CONCURRENT_JOBS", "2"))

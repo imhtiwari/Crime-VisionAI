@@ -1,304 +1,106 @@
 # CrimeVision AI
 
-Intelligent Multimodal Forensic Analysis Platform
+CrimeVision AI is a locally runnable, multimodal forensic analysis prototype. It stores uploaded evidence and generated analyses in SQLite and local storage, and presents them through a React dashboard. Findings are preliminary decision-support material and require human review.
 
-CrimeVision AI is an AI-powered forensic analysis and decision-support platform that processes images, videos, audio recordings, and natural-language queries using computer vision, speech recognition, and large language models.
+## Current capabilities
 
-## ⚠️ Important Disclaimer
+- **Evidence Vault:** image, video, and audio uploads; content validation; SHA-256 hashes; duplicate detection; persistent metadata; preview/download; confirmed deletion with audit record.
+- **Images:** dimensions/format metadata, optional local RT-DETR detection, optional local BLIP captioning, annotated derivatives, confidence threshold, and explicit unavailable status when no model is installed.
+- **Video:** OpenCV validation, background frame sampling, media-relative timestamps, per-frame detections when a detector is available, saved sampled frames, and persistent job progress. This is sampled-frame analysis, not action recognition.
+- **Audio:** WAV validation and background Faster-Whisper transcription with timestamped segments when Faster-Whisper and local model weights are configured. MP3/M4A/FLAC/OGG decoding requires PyAV. Transcripts remain separate from generated summaries.
+- **Timeline:** persistent upload, analysis, and transcript records plus investigator annotations; filters and review status changes are audit logged. Media-relative timing is not synchronized across files.
+- **Assistant:** persistent conversations and evidence-grounded Groq responses, with schema validation and server-side citation checks. Requires `GROQ_API_KEY` and `GROQ_MODEL`.
+- **Reports:** downloadable record-derived PDF reports. ReportLab is the preferred renderer; a small built-in text PDF renderer keeps report generation available when that optional dependency is missing.
+- **3D scene view:** interactive illustrative projection of real 2D detections. It does not estimate accurate physical depth or scene geometry.
+- **Dashboard:** real persisted counts, recent activity, recent jobs, media type counts, and timeline activity.
 
-**This is a prototype for investigative decision support. Model outputs are preliminary analytical findings, not established facts.**
+No detections, captions, transcripts, or assistant answers are fabricated when a model is unavailable. The default install does not download large model weights. General pretrained detectors only identify their supported classes and cannot be assumed to identify weapons or other forensic traces.
 
-- Never automatically declare a person guilty or identify a suspect solely from visual appearance
-- Distinguish observed evidence from model-generated interpretations and hypotheses
-- Never fabricate evidence, timestamps, quotations, confidence scores, or citations
-- Record uncertainty and conflicting evidence explicitly
-- Keep human investigators responsible for conclusions and decisions
-- This system must be validated before operational forensic use
+## Requirements
 
-## Technology Stack
+- Python 3.9 or later (the current environment was verified with Python 3.13.2)
+- Node.js 18 or later
+- Windows PowerShell, macOS, or Linux
+- Optional: local RT-DETR weights and PyTorch/Transformers; Faster-Whisper model files; Groq API credentials
 
-### Backend
-- Python 3.9+
-- Flask (REST API)
-- SQLAlchemy (Database)
-- SQLite (Local development)
-- PyTorch (Model inference)
-- OpenCV (Image/video processing)
-- Faster-Whisper (Audio transcription)
-- Groq API (LLM reasoning)
-- ReportLab (PDF generation)
+## Run on Windows
 
-### Frontend
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Lucide React (Icons)
-- React Router (Navigation)
-- Axios (API communication)
-- Recharts (Analytics)
-- Three.js / React Three Fiber (3D visualization)
+In one PowerShell terminal:
 
-## Project Structure
-
-```
-crimevision-ai/
-├── backend/
-│   ├── app/
-│   │   ├── models/         # Database models
-│   │   ├── schemas/        # Pydantic schemas
-│   │   ├── routes/         # API endpoints
-│   │   ├── services/       # Business logic
-│   │   ├── ai/             # AI model adapters
-│   │   └── utils/          # Utilities
-│   ├── storage/            # Evidence and reports
-│   ├── tests/              # Automated tests
-│   ├── requirements.txt
-│   └── run.py
-├── frontend/
-│   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API services
-│   │   └── types/          # TypeScript types
-│   ├── package.json
-│   └── vite.config.ts
-├── docs/                   # Documentation
-├── .gitignore
-└── README.md
-```
-
-## Setup Instructions (Windows)
-
-### Prerequisites
-
-- Python 3.9 or higher
-- Node.js 18 or higher
-- PowerShell
-
-### Backend Setup
-
-1. Navigate to the backend directory:
 ```powershell
 cd backend
-```
-
-2. Create a Python virtual environment:
-```powershell
 python -m venv .venv
-```
-
-3. Activate the virtual environment:
-```powershell
 .venv\Scripts\Activate.ps1
-```
-
-**Note:** If you encounter a PowerShell execution policy error, run:
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-```
-
-Then try activation again.
-
-4. Upgrade pip:
-```powershell
 python -m pip install --upgrade pip
-```
-
-5. Install dependencies:
-```powershell
 pip install -r requirements.txt
-```
-
-6. Create environment configuration:
-```powershell
-Copy .env.example .env
-```
-
-7. Edit `.env` and configure your settings (optional for initial setup):
-```env
-GROQ_API_KEY=your_api_key_here
-```
-
-8. Start the backend server:
-```powershell
+Copy-Item .env.example .env
 python run.py
 ```
 
-The backend will start on `http://127.0.0.1:5000`
+If PowerShell blocks activation, either run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process` for that terminal, or run the venv interpreter directly: `.venv\Scripts\python.exe run.py`.
 
-### Frontend Setup
+In a second terminal:
 
-1. Open a new PowerShell terminal and navigate to the frontend directory:
 ```powershell
 cd frontend
-```
-
-2. Install dependencies:
-```powershell
 npm install
-```
-
-3. Create environment configuration:
-```powershell
-Copy .env.example .env
-```
-
-4. Start the development server:
-```powershell
+Copy-Item .env.example .env
 npm run dev
 ```
 
-The frontend will start on `http://localhost:5173`
+Open `http://localhost:5173`. Vite proxies `/api` calls to `http://127.0.0.1:5000`; the frontend never receives the Groq secret. The API base can be set with `VITE_API_BASE_URL` when using a different setup.
 
-### Verify Installation
+## Optional AI services
 
-1. Check backend health:
+Configure these in `backend/.env`; do not put secrets in frontend variables:
+
+```dotenv
+GROQ_API_KEY=your_key_here
+GROQ_MODEL=your_supported_model_name
+```
+
+For local object detection, install `backend/requirements-vision.txt`, then set `DETECTION_MODEL_PATH` to a local Transformers RT-DETR directory containing its config, weights, and processor config. The adapter loads local files only. For local captioning, set `CAPTION_MODEL_PATH` to a local BLIP directory. For speech transcription, install `backend/requirements-audio.txt` and set `WHISPER_MODEL_PATH` to a local Faster-Whisper model directory. Audio model downloads are disabled unless explicitly enabled with `ALLOW_MODEL_DOWNLOAD=true`.
+
+`GET /api/v1/capabilities` reports what is configured. If the model runtime or weights are absent, the corresponding feature reports unavailable and the rest of the app remains usable.
+
+## Tests and checks
+
+Backend API tests use `unittest` (also discoverable by pytest):
+
 ```powershell
-curl http://127.0.0.1:5000/api/v1/health
+cd backend
+.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Expected response:
-```json
-{
-  "status": "healthy",
-  "service": "CrimeVision AI Backend",
-  "version": "0.1.0",
-  "environment": "development"
-}
-```
+Frontend type check and production build:
 
-2. Open your browser and navigate to `http://localhost:5173` to see the frontend dashboard.
-
-## Features
-
-### Overview Dashboard
-- Evidence statistics
-- Recent activity
-- Quick actions
-
-### Evidence Vault
-- Upload images, videos, and audio
-- File validation and hashing
-- Evidence metadata management
-
-### Image Analysis
-- Object detection
-- Scene captioning
-- Bounding box visualization
-- Confidence filtering
-
-### Video Analysis
-- Frame extraction and sampling
-- Object detection on frames
-- Timestamped event detection
-- Processing job management
-
-### Audio Analysis
-- Speech-to-text transcription
-- Timestamped transcript segments
-- Transcript search and export
-
-### Forensic Timeline
-- Unified event timeline
-- Cross-modal evidence correlation
-- Event filtering and navigation
-
-### AI Investigation Assistant
-- Evidence-grounded queries
-- Persistent conversation history
-- Structured responses with citations
-- Hypothesis generation
-
-### 3D Scene Viewer
-- Interactive 3D visualization
-- Detected object markers
-- Scene layout reconstruction
-
-### Forensic Reports
-- Professional PDF generation
-- Evidence inventory
-- Analysis results
-- AI-generated content disclaimer
-
-## API Endpoints
-
-### Health
-- `GET /api/v1/health` - Backend health check
-- `GET /api/v1/capabilities` - System capabilities
-
-### Evidence
-- `POST /api/v1/evidence/upload` - Upload evidence
-- `GET /api/v1/evidence` - List evidence
-- `GET /api/v1/evidence/{id}` - Get evidence details
-- `DELETE /api/v1/evidence/{id}` - Delete evidence
-
-### Analysis
-- `POST /api/v1/analysis/image/{id}` - Run image analysis
-- `POST /api/v1/analysis/video/{id}` - Start video processing
-- `POST /api/v1/analysis/audio/{id}` - Start transcription
-
-### Timeline
-- `GET /api/v1/timeline` - Retrieve timeline events
-- `POST /api/v1/timeline/events` - Create event
-
-### AI Assistant
-- `POST /api/v1/chat/conversations` - Create conversation
-- `GET /api/v1/chat/conversations/{id}` - Get conversation
-- `POST /api/v1/chat/conversations/{id}/messages` - Send message
-
-### Reports
-- `POST /api/v1/reports` - Generate report
-- `GET /api/v1/reports/{id}/download` - Download PDF
-
-## Development Milestones
-
-- ✅ Milestone 1: Project Foundation
-- ⏳ Milestone 2: Image Analysis
-- ⏳ Milestone 3: Audio Analysis
-- ⏳ Milestone 4: Video Analysis
-- ⏳ Milestone 5: Multimodal Intelligence
-- ⏳ Milestone 6: Reporting and Visualization
-- ⏳ Milestone 7: Testing and Deployment
-
-## Troubleshooting
-
-### PowerShell Virtual Environment Activation
-If activation fails with execution policy errors:
 ```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-.venv\Scripts\Activate.ps1
+cd frontend
+npm run build
 ```
 
-Or use the Python executable directly:
-```powershell
-.venv\Scripts\python.exe run.py
-```
+## API overview
 
-### Port Already in Use
-If port 5000 or 5173 is in use, change the port in:
-- Backend: `backend/.env` (PORT variable)
-- Frontend: `frontend/vite.config.ts` (server.port)
+All API routes are under `/api/v1`. See [docs/api.md](docs/api.md) for the request and response outline.
 
-### Missing API Keys
-The application will start without Groq API key configured. AI-powered features will show informative messages when unavailable.
+- `GET /health`, `GET /capabilities`, `GET /dashboard`
+- `POST /evidence/upload`, `GET /evidence`, `GET /evidence/{id}`, `GET /evidence/{id}/download`, `GET /evidence/{id}/preview`, `DELETE /evidence/{id}?confirm={id}`
+- `POST /analysis/image/{id}`, `POST /analysis/video/{id}`, `POST /analysis/audio/{id}`, `GET /analysis/{id}`, `GET /analysis/audio/{id}/transcript`, `GET /jobs/{id}`
+- `GET /timeline`, `POST /timeline/events`, `PATCH /timeline/events/{id}`
+- `POST /chat/conversations`, `GET /chat/conversations`, `GET /chat/conversations/{id}`, `POST /chat/conversations/{id}/messages`
+- `POST /reports`, `GET /reports`, `GET /reports/{id}/download`
 
-### Model Download Failures
-Large model downloads may fail due to network or disk space. Configure smaller models in `.env` or ensure adequate disk space and network connectivity.
+## Storage and security
 
-## Security Considerations
+SQLite, uploaded originals, generated frame images, annotated derivatives, and PDFs are stored under `backend/` by default. Original evidence bytes are kept separate from generated derivatives. SHA-256 hashes identify the uploaded bytes recorded by this app; they do not establish authenticity or completeness. Uploads are type/content validated, assigned internal names, bounded by `MAX_UPLOAD_SIZE`, and stored outside the frontend's public assets.
 
-- Never commit `.env` files or real API keys
-- Validate all uploaded files
-- Store evidence outside public directories
-- Implement authentication before production use
-- Treat all uploaded evidence as untrusted input
-- Log analysis operations for audit trails
+This is a local single-user prototype. It does not implement login, multi-user authorization, or case-level access controls; keep it bound to localhost and do not expose it to a network until authentication and authorization are added. API changes and deletion operations are logged where implemented. Treat uploaded files and transcripts as untrusted. Validate this application and its models before operational forensic use.
 
-## License
+## Known limitations
 
-This project is provided as a prototype for forensic analysis research and development.
-
-## Support
-
-For issues, questions, or contributions, please refer to the project documentation in the `docs/` directory.
+- No model weights or Groq key are bundled. Image detection, captioning, transcription, and LLM reasoning depend on configuration.
+- Video processing is background-thread based for a single local process; job records survive restarts, but interrupted jobs are marked failed. It is not a distributed queue.
+- No action-recognition, diarization, calibrated depth reconstruction, automatic clock synchronization, or verified crime classification is implemented.
+- Codec support depends on OpenCV and optional PyAV availability; capability output lists current supported formats.
+- SQLite schema initialization uses SQLAlchemy `create_all`; a migration framework is not yet configured.
+- Local unauthenticated operation is for development only.

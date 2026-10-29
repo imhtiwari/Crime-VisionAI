@@ -19,11 +19,8 @@ requests==2.31.0
 opencv-python-headless>=4.8.0
 Pillow>=10.2.0
 numpy>=1.24.0
+reportlab>=4.2,<5
+pytest>=8.0,<9
 
-# Note: Heavy AI packages will be installed separately when needed:
-# - torch (large download, ~2GB)
-# - transformers (requires compilation or pre-built wheel)
-# - pydantic (requires compilation)
-# - faster-whisper (requires compilation)
-# - groq (has pre-built wheels)
-# - reportlab (has pre-built wheels)
+# Optional model runtimes are listed separately. Install them only when the
+# machine is prepared for their package and local model-weight footprint.
