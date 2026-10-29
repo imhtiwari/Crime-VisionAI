@@ -27,13 +27,14 @@ class Settings:
     REPORTS_FOLDER: str = os.getenv("REPORTS_FOLDER", "storage/reports")
     THUMBNAILS_FOLDER: str = os.getenv("THUMBNAILS_FOLDER", "storage/thumbnails")
     DERIVED_FOLDER: str = os.getenv("DERIVED_FOLDER", "storage/derived")
-    # For production (Render), use absolute path if available
+    # For production (Render), use data directory
     if os.getenv("RENDER"):
-        UPLOAD_FOLDER = os.path.join(os.getenv("RENDER_DATA_DIR", "/opt/render/project/src"), "storage", "uploads")
-        EVIDENCE_FOLDER = os.path.join(os.getenv("RENDER_DATA_DIR", "/opt/render/project/src"), "storage", "evidence")
-        REPORTS_FOLDER = os.path.join(os.getenv("RENDER_DATA_DIR", "/opt/render/project/src"), "storage", "reports")
-        THUMBNAILS_FOLDER = os.path.join(os.getenv("RENDER_DATA_DIR", "/opt/render/project/src"), "storage", "thumbnails")
-        DERIVED_FOLDER = os.path.join(os.getenv("RENDER_DATA_DIR", "/opt/render/project/src"), "storage", "derived")
+        data_dir = os.getenv("RENDER_DATA_DIR", "/opt/render/project/src")
+        UPLOAD_FOLDER = os.path.join(data_dir, "storage", "uploads")
+        EVIDENCE_FOLDER = os.path.join(data_dir, "storage", "evidence")
+        REPORTS_FOLDER = os.path.join(data_dir, "storage", "reports")
+        THUMBNAILS_FOLDER = os.path.join(data_dir, "storage", "thumbnails")
+        DERIVED_FOLDER = os.path.join(data_dir, "storage", "derived")
     MAX_UPLOAD_SIZE: int = int(os.getenv("MAX_UPLOAD_SIZE", str(500 * 1024 * 1024)))  # 500MB
     
     # CORS
